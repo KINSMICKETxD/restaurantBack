@@ -36,9 +36,6 @@ public class RestaurantTable {
     private boolean isAvailable;
 
 
-    @Column(name = "special_request")
-    private String specialRequest;
-
     @OneToMany(mappedBy = "table",fetch = FetchType.LAZY)
     private Set<Reservation> reservations;
 

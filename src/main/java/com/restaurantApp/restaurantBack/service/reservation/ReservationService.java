@@ -1,5 +1,7 @@
 package com.restaurantApp.restaurantBack.service.reservation;
 
+import com.restaurantApp.restaurantBack.dto.ReservationDTO;
+import com.restaurantApp.restaurantBack.dto.ReservationDurationDTO;
 import com.restaurantApp.restaurantBack.entity.Reservation;
 
 import java.util.List;
@@ -12,7 +14,10 @@ public interface ReservationService {
 
     List<Reservation> findAllByCustomerId(int CustomerId);
 
-    void save(int customerId,Reservation reservation);
+    ReservationDTO save(ReservationDTO reservationDTO);
 
     void deleteById(int reservationId);
+
+    List<ReservationDurationDTO> getAllReservationByTableId(int tableId);
+
 }

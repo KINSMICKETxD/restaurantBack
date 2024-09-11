@@ -1,5 +1,7 @@
 package com.restaurantApp.restaurantBack.service.itemCategory;
 
+import com.restaurantApp.restaurantBack.dto.ItemCategoryDTO;
+import com.restaurantApp.restaurantBack.dto.MenuItemDTO;
 import com.restaurantApp.restaurantBack.entity.ItemCategory;
 import com.restaurantApp.restaurantBack.entity.MenuItem;
 
@@ -7,7 +9,7 @@ import java.util.List;
 
 public interface ItemCategoryService {
 
-    ItemCategory findItemCategoryById(int itemCategoryId);
+    ItemCategoryDTO findItemCategoryById(int itemCategoryId);
 
     ItemCategory findItemCategoryByName(String categoryName);
 
@@ -18,4 +20,7 @@ public interface ItemCategoryService {
     ItemCategory updateCategory(int categoryId,ItemCategory itemCategory);
 
     void deleteMenuItemById(int itemCategoryId);
+
+    List<MenuItemDTO> getAllMenuItemsByCategoryId(int categoryId);
+
 }

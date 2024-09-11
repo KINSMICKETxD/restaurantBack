@@ -1,6 +1,6 @@
 package com.restaurantApp.restaurantBack.service.customer.CustomerAddress;
 
-import com.restaurantApp.restaurantBack.dao.CustomerAddressDAO;
+import com.restaurantApp.restaurantBack.dao.CustomerDAO.CustomerAddressDAO;
 import com.restaurantApp.restaurantBack.entity.CustomerAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -2,7 +2,9 @@ package com.restaurantApp.restaurantBack.service.menuItem;
 
 import com.restaurantApp.restaurantBack.dao.MenuItemDAO;
 import com.restaurantApp.restaurantBack.dto.MenuItemDTO;
+import com.restaurantApp.restaurantBack.entity.Ingredient;
 import com.restaurantApp.restaurantBack.entity.MenuItem;
+import com.restaurantApp.restaurantBack.exception.ItemNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +26,24 @@ public class MenuItemServiceImpl implements MenuItemService{
 
     @Override
     public MenuItemDTO findById(int itemId) {
-        return convertToDTO(this.menuItemDAO.findById(itemId).get());
+        MenuItem menuItem = menuItemDAO.findById(itemId).orElseThrow(
+                ()-> new ItemNotFoundException("Item with ID = "+itemId+" Is not found.")
+        );
+        return convertToDTO(menuItem);
+
     }
 
     @Override
-    public List<MenuItem> findAll() {
-        return menuItemDAO.findAll();
+    public List<MenuItemDTO> findAll() {
+        List<MenuItem> menuItems = menuItemDAO.findAll();
+        if(menuItems == null){
+            throw new ItemNotFoundException("There is no Menu Items in the restaurant.");
+        }
+        List<MenuItemDTO> menuItemDTOS = new ArrayList<>();
+        for(MenuItem m : menuItems){
+            menuItemDTOS.add(convertToDTO(m));
+        }
+        return menuItemDTOS;
     }
 
     @Override
@@ -62,7 +76,6 @@ public class MenuItemServiceImpl implements MenuItemService{
 
     public MenuItemDTO convertToDTO(MenuItem menuItem){
         MenuItemDTO menuItemDTO = new MenuItemDTO();
-        menuItemDTO.setId(menuItem.getId());
         menuItemDTO.setName(menuItem.getName());
         menuItemDTO.setDescription(menuItem.getDescription());
         menuItemDTO.setPrice(menuItem.getPrice());
@@ -70,7 +83,10 @@ public class MenuItemServiceImpl implements MenuItemService{
         menuItemDTO.setCategory(menuItem.getCategory().getName());
         menuItemDTO.setImagePath(menuItem.getImagePath());
         menuItemDTO.setDietaryTag(menuItem.getDietaryTag());
-
+        List<Ingredient> ingredients = menuItem.getIngredients();
+        for(Ingredient ingredient : ingredients){
+            menuItemDTO.addIngredient(ingredient.getName());
+        }
         return menuItemDTO;
     }
 }

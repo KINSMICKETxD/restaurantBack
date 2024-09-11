@@ -10,16 +10,21 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@Table(name = "customer")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Customer extends User {
+public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "customer_id")
     private int id;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
 
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
@@ -32,6 +37,11 @@ public class Customer extends User {
 
     @OneToMany(mappedBy = "customer",fetch = FetchType.EAGER)
     private Set<Reservation> reservations;
+
+    @OneToMany(mappedBy = "customer",fetch = FetchType.LAZY)
+    private Set<Order> orders;
+
+
 
 
 

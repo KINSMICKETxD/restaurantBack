@@ -1,9 +1,11 @@
 package com.restaurantApp.restaurantBack.controller;
 
 
-import com.restaurantApp.restaurantBack.dao.ItemCategoryDAO;
+import com.restaurantApp.restaurantBack.dto.ItemCategoryDTO;
+import com.restaurantApp.restaurantBack.dto.MenuItemDTO;
 import com.restaurantApp.restaurantBack.entity.ItemCategory;
 import com.restaurantApp.restaurantBack.service.itemCategory.ItemCategoryService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,15 +29,16 @@ public class ItemCategoryController {
     }
 
     @GetMapping("/{categoryId}")
-    public ItemCategory findById(@PathVariable int categoryId){
+    public ResponseEntity<ItemCategoryDTO> findById(@PathVariable int categoryId){
 
-        return this.itemCategoryService.findItemCategoryById(categoryId);
+        return ResponseEntity.ok(this.itemCategoryService.findItemCategoryById(categoryId));
     }
 
-    @GetMapping("/{categoryName}")
-    public ItemCategory findByName(@PathVariable String categoryName){
+    @GetMapping("/{categoryId}/items")
+    public ResponseEntity<List<MenuItemDTO>> getAllMenuItemsByCategoryId(@PathVariable("categoryId")int categoryId){
 
-        return this.itemCategoryService.findItemCategoryByName(categoryName);
+        List<MenuItemDTO> menuItemDTOS = this.itemCategoryService.getAllMenuItemsByCategoryId(categoryId);
+        return ResponseEntity.ok(menuItemDTOS);
     }
 
     @PostMapping

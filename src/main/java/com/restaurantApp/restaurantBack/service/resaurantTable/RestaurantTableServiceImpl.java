@@ -1,11 +1,13 @@
 package com.restaurantApp.restaurantBack.service.resaurantTable;
 
 import com.restaurantApp.restaurantBack.dao.RestaurantTableDAO;
+import com.restaurantApp.restaurantBack.dto.RestaurantTableDTO;
 import com.restaurantApp.restaurantBack.entity.RestaurantTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,8 +29,14 @@ public class RestaurantTableServiceImpl implements RestaurantTableService{
     }
 
     @Override
-    public List<RestaurantTable> findAll() {
-        return tableDAO.findAll();
+    public List<RestaurantTableDTO> findAll() {
+        List<RestaurantTable> restaurantTables= tableDAO.findAllByOrderByTableNumberAsc().get();
+        List<RestaurantTableDTO> restaurantTableDTOS = new ArrayList<>();
+        for(RestaurantTable table : restaurantTables){
+            restaurantTableDTOS.add(convertToDTO(table));
+        }
+
+        return restaurantTableDTOS;
     }
 
     @Override
@@ -43,5 +51,16 @@ public class RestaurantTableServiceImpl implements RestaurantTableService{
 
         tableDAO.deleteById(tableId);
 
+    }
+
+    RestaurantTableDTO convertToDTO(RestaurantTable restaurantTable){
+        RestaurantTableDTO restaurantTableDTO = new RestaurantTableDTO(
+                restaurantTable.getId(), restaurantTable.getTableNumber(),
+                restaurantTable.getDesc(),restaurantTable.getSeatingCapacity(),
+                restaurantTable.isAvailable()
+        );
+
+
+        return restaurantTableDTO;
     }
 }

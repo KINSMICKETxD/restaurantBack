@@ -5,7 +5,9 @@ import com.restaurantApp.restaurantBack.dto.MenuItemDTO;
 import com.restaurantApp.restaurantBack.entity.Customer;
 import com.restaurantApp.restaurantBack.entity.MenuItem;
 import com.restaurantApp.restaurantBack.service.menuItem.MenuItemService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -25,13 +27,16 @@ public class MenuItemController {
 
 
     @GetMapping
-    public List<MenuItem> getAllItems(){
+    public List<MenuItemDTO> getAllItems(){
         return this.menuItemService.findAll();
     }
     @GetMapping("/{menuItemId}")
-    public MenuItemDTO getItemById(@PathVariable("menuItemId") int itemId){
-        return menuItemService.findById(itemId);
+    public ResponseEntity<MenuItemDTO> getItemById(@PathVariable("menuItemId") int itemId){
+        MenuItemDTO menuItemDTO = this.menuItemService.findById(itemId);
+
+        return ResponseEntity.ok(menuItemDTO);
     }
+
     @PostMapping
     public MenuItem addNewItem(@RequestBody MenuItem newItem){
 

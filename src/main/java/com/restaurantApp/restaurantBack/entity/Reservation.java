@@ -1,13 +1,14 @@
 package com.restaurantApp.restaurantBack.entity;
 
+import com.restaurantApp.restaurantBack.Validation.ValidReservationDate;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reservation")
@@ -15,6 +16,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@ValidReservationDate
 public class Reservation {
 
 
@@ -31,11 +33,24 @@ public class Reservation {
     @JoinColumn(name = "table_id")
     private RestaurantTable table;
 
-    @Column(name = "reservation_date")
-    private LocalDate reservationDate;
 
-    @Column(name = "reservation_time")
-    private LocalTime reservationTime;
+    @Column(name = "reservation_date_begin")
+    @FutureOrPresent(message = "reservation date must can't be in the past")
+    private LocalDateTime reservationDateTimeBegin;
+
+    @Column(name = "reservation_date_end")
+    @FutureOrPresent(message = "reservation Date should cannot be in the Past")
+    private LocalDateTime reservationDateTimeEnd;
+
+    @Column(name = "guests_number")
+    private int guestNumber;
+
+    @Column(name = "special_Instructors")
+    private String specialInstructions;
+
+
+
+
 
 
 

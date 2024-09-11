@@ -1,5 +1,6 @@
 package com.restaurantApp.restaurantBack.entity;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,12 +9,17 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "user")
-public abstract class User {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private int id;
+
 
     @Column(name = "first_name")
     private String firstName;

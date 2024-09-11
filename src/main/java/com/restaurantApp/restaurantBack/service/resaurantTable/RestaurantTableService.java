@@ -1,5 +1,6 @@
 package com.restaurantApp.restaurantBack.service.resaurantTable;
 
+import com.restaurantApp.restaurantBack.dto.RestaurantTableDTO;
 import com.restaurantApp.restaurantBack.entity.RestaurantTable;
 
 import java.util.List;
@@ -8,7 +9,7 @@ public interface RestaurantTableService {
 
     RestaurantTable findTableById(int tableId);
 
-    List<RestaurantTable> findAll();
+    List<RestaurantTableDTO> findAll();
 
     void save(RestaurantTable table);
 

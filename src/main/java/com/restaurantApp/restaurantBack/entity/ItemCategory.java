@@ -1,20 +1,19 @@
 package com.restaurantApp.restaurantBack.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name = "item_category")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class ItemCategory {
 
 
@@ -29,6 +28,17 @@ public class ItemCategory {
     @Column(name = "category_name")
     private String name;
 
-    @OneToMany(mappedBy = "category",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "category",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<MenuItem> itemList;
+
+
+    @Override
+    public String toString() {
+        return "ItemCategory{" +
+                "id=" + id +
+                ", desc='" + desc + '\'' +
+                ", name='" + name + '\'' +
+                ", Number of Items='" + itemList.size() +
+                '}';
+    }
 }

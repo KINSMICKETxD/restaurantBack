@@ -10,11 +10,12 @@ public interface MenuItemService {
 
      MenuItemDTO findById(int itemId);
 
-    List<MenuItem> findAll();
+    List<MenuItemDTO> findAll();
 
     MenuItem save(MenuItem menuItem);
 
     void deleteMenuItemById(int itemId);
 
     HashMap<String,List<MenuItemDTO>> getMenuItemsOrganizedByCategory();
+
 }
