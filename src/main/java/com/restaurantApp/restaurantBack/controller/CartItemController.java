@@ -1,17 +1,20 @@
 package com.restaurantApp.restaurantBack.controller;
 
 
-import com.restaurantApp.restaurantBack.dto.CartItemDTO;
-import com.restaurantApp.restaurantBack.entity.CartItem;
+import com.restaurantApp.restaurantBack.dto.CartItemDTOS.RequestCartItemDTO;
+import com.restaurantApp.restaurantBack.dto.CartItemDTOS.ResponseCartItemDTO;
+import com.restaurantApp.restaurantBack.dto.CartItemDTOS.UpdateCartItemDTO;
+import com.restaurantApp.restaurantBack.entity.User;
 import com.restaurantApp.restaurantBack.service.cartItem.CartItemService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/cartItems")
+@RequestMapping("/cart/cartItems")
 public class CartItemController {
 
 
@@ -23,24 +26,29 @@ public class CartItemController {
         this.cartItemService = cartItemService;
     }
 
-    @PostMapping("/{customerId}")
-    public ResponseEntity<CartItemDTO> addItemToCart(@Valid @RequestBody  CartItemDTO cartItemDTO, @PathVariable("customerId")int customerId){
-        CartItemDTO savedCartItem =  this.cartItemService.addCartItem(cartItemDTO,customerId);
+    @PostMapping()
+    public ResponseEntity<ResponseCartItemDTO> addItemToCart(@Valid @RequestBody RequestCartItemDTO requestCartItemDTO){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userName = auth.getName();
+        ResponseCartItemDTO responseCartItemDTO =  this.cartItemService.addCartItem(requestCartItemDTO, userName);
 
-        return ResponseEntity.ok(savedCartItem);
+        return ResponseEntity.ok(responseCartItemDTO);
     }
 
     @GetMapping("/{cartItemId}")
-    public ResponseEntity<CartItemDTO> findById(@PathVariable("cartItemId")int carteItemId){
-        return ResponseEntity.ok(cartItemService.findById(carteItemId));
+    public ResponseEntity<ResponseCartItemDTO> findById(@PathVariable("cartItemId")int carteItemId){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User authenticatedUser = (User)auth.getPrincipal();
+        ResponseCartItemDTO responseCartItemDTO = this.cartItemService.findById(carteItemId);
+
+        return ResponseEntity.ok(responseCartItemDTO);
     }
 
-    @PutMapping("/{customerId}")
-    public ResponseEntity<CartItemDTO> updateCartItem(@Valid @RequestBody CartItemDTO cartItemDTO,
-                                                      @PathVariable("customerId")int customerId){
+    @PutMapping("/{cartItemId}")
+    public ResponseEntity<ResponseCartItemDTO> updateCartItem(@Valid @RequestBody UpdateCartItemDTO updateCartItemDTO, @PathVariable("cartItemId")int cartItemId){
 
-        CartItemDTO updatedCartItemDTO = this.cartItemService.updateCartItem(cartItemDTO,customerId);
-        return ResponseEntity.ok(updatedCartItemDTO);
+        ResponseCartItemDTO responseCartItemDTO = this.cartItemService.updateCartItem(updateCartItemDTO,cartItemId);
+        return ResponseEntity.ok(responseCartItemDTO);
     }
 
     @DeleteMapping("/{cartItemId}")

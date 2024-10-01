@@ -13,5 +13,11 @@ import java.util.Optional;
 public interface CustomerDAO extends JpaRepository<Customer,Integer> {
 
 
+    @Query("from Customer c where c.user.userName = :userName")
+    Optional<Customer> findCustomerByUserName(@Param("userName")String userName);
+
+    @Query("select c.id from Customer c where c.user.userName = :userName")
+    Optional<Integer> findCustomerIdByUserName(@Param("userName")String userName);
+
 
 }

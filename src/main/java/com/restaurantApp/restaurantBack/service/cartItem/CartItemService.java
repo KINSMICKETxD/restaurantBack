@@ -1,20 +1,20 @@
 package com.restaurantApp.restaurantBack.service.cartItem;
 
-import com.restaurantApp.restaurantBack.dto.CartItemDTO;
-import com.restaurantApp.restaurantBack.entity.CartItem;
+import com.restaurantApp.restaurantBack.dto.CartItemDTOS.RequestCartItemDTO;
+import com.restaurantApp.restaurantBack.dto.CartItemDTOS.ResponseCartItemDTO;
+import com.restaurantApp.restaurantBack.dto.CartItemDTOS.UpdateCartItemDTO;
+import org.apache.coyote.Response;
 
 import java.util.List;
 
 public interface CartItemService {
 
 
-    CartItemDTO addCartItem(CartItemDTO cartItemDTO,int customerId);
+    ResponseCartItemDTO addCartItem(RequestCartItemDTO requestCartItemDTO,String userName);
 
-    CartItemDTO findById(int cartItemId);
+    ResponseCartItemDTO findById(int cartItemId);
 
-    List<CartItemDTO> findAllCartItemsByCustomerId(int customerId);
-
-    CartItemDTO updateCartItem(CartItemDTO cartItemDTO,int customerId);
+    ResponseCartItemDTO updateCartItem(UpdateCartItemDTO updateCartItemDTO, int cartItemId);
 
     void deleteById(int cartItemId);
 

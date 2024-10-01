@@ -31,14 +31,4 @@ public class ItemCategory {
     @OneToMany(mappedBy = "category",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<MenuItem> itemList;
 
-
-    @Override
-    public String toString() {
-        return "ItemCategory{" +
-                "id=" + id +
-                ", desc='" + desc + '\'' +
-                ", name='" + name + '\'' +
-                ", Number of Items='" + itemList.size() +
-                '}';
-    }
 }

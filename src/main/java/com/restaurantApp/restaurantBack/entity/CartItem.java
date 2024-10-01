@@ -13,7 +13,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class CartItem {
 
     @Id
@@ -29,12 +28,13 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
-    @JsonBackReference
     private Cart cart;
 
     private Double TotalPrice;
 
     private String customization;
+
+
 
 
 }

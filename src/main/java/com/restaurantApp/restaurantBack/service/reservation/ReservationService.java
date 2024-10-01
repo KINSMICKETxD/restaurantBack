@@ -12,12 +12,16 @@ public interface ReservationService {
 
     Reservation findByIdAndCustomerId(int reservationId,int customerId);
 
-    List<Reservation> findAllByCustomerId(int CustomerId);
+    List<ReservationDTO> findAllByCustomerId(int CustomerId);
 
-    ReservationDTO save(ReservationDTO reservationDTO);
+    ReservationDTO updateReservation(ReservationDTO reservationDTO,int reservationId);
 
     void deleteById(int reservationId);
 
     List<ReservationDurationDTO> getAllReservationByTableId(int tableId);
+
+    ReservationDTO createNewReservation(ReservationDTO reservationDTO,int customerId);
+
+    ReservationDTO cancelReservation(int reservationId);
 
 }

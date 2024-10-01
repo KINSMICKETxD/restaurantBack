@@ -3,19 +3,16 @@ package com.restaurantApp.restaurantBack.service.reservation;
 import com.restaurantApp.restaurantBack.dao.CustomerDAO.CustomerDAO;
 import com.restaurantApp.restaurantBack.dao.ReservationDAO;
 import com.restaurantApp.restaurantBack.dao.RestaurantTableDAO;
-import com.restaurantApp.restaurantBack.dao.UserDAO;
 import com.restaurantApp.restaurantBack.dto.ReservationDTO;
 import com.restaurantApp.restaurantBack.dto.ReservationDurationDTO;
 import com.restaurantApp.restaurantBack.entity.Customer;
 import com.restaurantApp.restaurantBack.entity.Reservation;
 import com.restaurantApp.restaurantBack.entity.RestaurantTable;
-import com.restaurantApp.restaurantBack.entity.User;
+import com.restaurantApp.restaurantBack.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 @Service
@@ -50,24 +47,43 @@ public class ReservationServiceImpl implements ReservationService{
     }
 
     @Override
-    public List<Reservation> findAllByCustomerId(int CustomerId) {
-        return this.reservationDAO.findByCustomerId(CustomerId);
+    public List<ReservationDTO> findAllByCustomerId(int customerId) {
+        List<Reservation> reservations = this.reservationDAO.findByCustomerId(customerId).get();
+        if(reservations.isEmpty()){
+            throw new NoReservationsFoundException("No Reservation found for customer with id = "+customerId);
+        }
+        List<ReservationDTO> reservationDTOS = new ArrayList<>();
+        for(Reservation reservation : reservations){
+            reservationDTOS.add(toDTO(reservation));
+        }
+        return reservationDTOS;
     }
 
     @Override
-    public ReservationDTO save(ReservationDTO reservationDTO) {
+    public ReservationDTO updateReservation(ReservationDTO reservationDTO,int reservationId) {
 
-        if(this.reservationDAO.isTableAvailable(reservationDTO.getTableId(),
+        Reservation reservation = this.reservationDAO.findById(reservationId).orElseThrow(
+                ()-> new ReservationNotFoundException("Reservation with ID = "+reservationId+" is not found.")
+        );
+
+        RestaurantTable table = this.restaurantTableDAO.findById(reservationDTO.getTableId()).orElseThrow(
+                ()->new TableNotFoundException("Table with id = "+reservationDTO.getTableId()+" is not found.")
+        );
+        int isTableAvailable = this.reservationDAO.isTableAvailable(reservationDTO.getTableId(),
                 reservationDTO.getReservationDateBegin(),
-                reservationDTO.getReservationDateEnd()) == 0) {
+                reservationDTO.getReservationDateEnd(),reservationDTO.getCustomerId());
+        if( isTableAvailable== 0 && reservationDTO.getNumberOfGuests() <= table.getSeatingCapacity() ) {
 
-            Reservation reservation = toEntity(reservationDTO);
-            reservation = this.reservationDAO.save(reservation);
-            if (reservation != null) {
-                return toDTO(reservation);
-            }
+            this.reservationDAO.save(toEntity(reservationDTO,reservation));
+            return toDTO(reservation);
+
+        }else if (isTableAvailable != 0){
+            throw  new TableIsReservedException("Table is already booked.");
+        }else{
+            throw new SeatingCapacityExceededException("Number of Guess ("+reservationDTO.getNumberOfGuests()+")" +
+                    " bypass Table seating Capacity ("+table.getSeatingCapacity()+").");
         }
-        return null;
+
     }
 
     @Override
@@ -78,8 +94,7 @@ public class ReservationServiceImpl implements ReservationService{
         this.reservationDAO.delete(theReservation);
     }
 
-    public Reservation toEntity(ReservationDTO reservationDTO){
-        Reservation reservation = new Reservation();
+    public Reservation toEntity(ReservationDTO reservationDTO,Reservation reservation){
         Customer customer =  customerDAO.findById(reservationDTO.getCustomerId()).get();
         RestaurantTable restaurantTable = this.restaurantTableDAO.findById(reservationDTO.getTableId()).get();
         LocalDateTime DateBegin = reservationDTO.getReservationDateBegin();
@@ -89,14 +104,13 @@ public class ReservationServiceImpl implements ReservationService{
         reservation.setReservationDateTimeBegin(DateBegin);
         reservation.setReservationDateTimeEnd(DateEnd);
         reservation.setGuestNumber(reservationDTO.getNumberOfGuests());
-
-        return this.reservationDAO.save(reservation);
+        reservation.setStatus(reservation.getStatus());
+        return reservation;
     }
 
     public ReservationDTO toDTO(Reservation reservation){
         ReservationDTO reservationDTO = new ReservationDTO();
         reservationDTO.setReservationId(reservation.getId());
-        reservationDTO.setUserName(reservation.getCustomer().getUser().getUserName());
         reservationDTO.setCustomerId(reservation.getCustomer().getId());
         reservationDTO.setTableId(reservation.getTable().getId());
         reservationDTO.setTableNumber(reservation.getTable().getTableNumber());
@@ -104,7 +118,7 @@ public class ReservationServiceImpl implements ReservationService{
         reservationDTO.setReservationDateEnd(reservation.getReservationDateTimeEnd());
         reservationDTO.setNumberOfGuests(reservation.getGuestNumber());
         reservationDTO.setSpecialInstruction(reservation.getSpecialInstructions());
-
+        reservationDTO.setStatus(reservation.getStatus());
         return reservationDTO;
 
     }
@@ -121,6 +135,47 @@ public class ReservationServiceImpl implements ReservationService{
 
         return reservationDurationDTOS;
     }
+
+
+
+    @Override
+    public ReservationDTO createNewReservation(ReservationDTO reservationDTO, int customerId) {
+        int customerActiveReservationsCount = this.reservationDAO.getAllActiveReservationsForCustomer(customerId,LocalDateTime.now()).get();
+        if(customerActiveReservationsCount > 2){
+            throw new MaxActiveReservationException("You  reach the Limit of Active Reservations");
+        }
+        Integer isTableBooked = this.reservationDAO.isTableAvailable(reservationDTO.getTableId(),reservationDTO.getReservationDateBegin(),reservationDTO.getReservationDateEnd(),
+                reservationDTO.getCustomerId());
+        if(isTableBooked > 0){
+            throw new TableIsReservedException("Table is reserved.");
+        }
+        RestaurantTable restaurantTable = this.restaurantTableDAO.findById(reservationDTO.getTableId()).get();
+        Customer customer = this.customerDAO.findById(customerId).orElseThrow(
+                ()-> new CustomerNotFoundException("customer with id = "+customerId+" is not found.")
+        );
+
+        Reservation reservation = new Reservation();
+        reservation.setCustomer(customer);
+        reservation.setTable(restaurantTable);
+        reservation.setGuestNumber(reservationDTO.getNumberOfGuests());
+        reservation.setReservationDateTimeBegin(reservationDTO.getReservationDateBegin());
+        reservation.setReservationDateTimeEnd(reservationDTO.getReservationDateEnd());
+        reservation.setSpecialInstructions(reservationDTO.getSpecialInstruction());
+        reservation.setStatus("Active");
+        return toDTO(this.reservationDAO.save(reservation));
+
+    }
+
+    @Override
+    public ReservationDTO cancelReservation(int reservationId) {
+        Reservation reservation = this.reservationDAO.findById(reservationId).orElseThrow(
+                ()-> new NoReservationsFoundException("reservation with ID = "+reservationId+" is not found.")
+        );
+
+        reservation.setStatus("Canceled");
+        return toDTO(reservationDAO.save(reservation));
+    }
+
 
    /* public boolean isTableAvailable(int table_id,LocalDateTime reservationTime){
         return !reservationDAO.isTableReserved(table_id,reservationTime);

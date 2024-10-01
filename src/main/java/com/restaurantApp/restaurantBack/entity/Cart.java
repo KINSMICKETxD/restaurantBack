@@ -28,10 +28,6 @@ public class Cart {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @OneToMany(mappedBy = "cart")
-    @JsonManagedReference
-    private List<CartItem> cartItemList;
-
     @Column(name = "totalAmount")
     private Double totalAmount;
 
@@ -42,25 +38,24 @@ public class Cart {
     private boolean isActive;
 
 
+    @OneToMany(mappedBy = "cart",fetch = FetchType.LAZY,orphanRemoval = true)
+    private List<CartItem> cartItems;
+
+
+
     public void addCartItem(CartItem cartItem){
-        if(cartItemList == null){
-            cartItemList = new ArrayList<>();
+        if(cartItems == null){
+            cartItems = new ArrayList<>();
         }
+        cartItems.add(cartItem);
         cartItem.setCart(this);
-        cartItemList.add(cartItem);
-
-        this.totalAmount += cartItem.getTotalPrice();
     }
 
-    @Override
-    public String toString() {
-        return "Cart{" +
-                "id=" + id +
-                ", customer=" + customer.getId() +
-                ", cartItemList=" + cartItemList +
-                ", totalAmount=" + totalAmount +
-                ", createdAt=" + createdAt +
-                ", isActive=" + isActive +
-                '}';
+    public void removeCartItem(CartItem cartItem){
+        cartItems.remove(cartItem);
+        cartItem.setCart(null);
     }
+
+
+
 }

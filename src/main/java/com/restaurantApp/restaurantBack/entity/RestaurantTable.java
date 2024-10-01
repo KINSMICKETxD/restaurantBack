@@ -14,7 +14,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class RestaurantTable {
 
     @Id

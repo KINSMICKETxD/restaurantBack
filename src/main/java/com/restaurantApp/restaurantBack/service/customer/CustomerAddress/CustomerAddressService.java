@@ -1,18 +1,18 @@
 package com.restaurantApp.restaurantBack.service.customer.CustomerAddress;
 
-import com.restaurantApp.restaurantBack.entity.CustomerAddress;
+import com.restaurantApp.restaurantBack.entity.Address;
 
 import java.util.List;
 
 public interface CustomerAddressService {
 
-    CustomerAddress findCustomerAddressById(int addressId);
+    Address findCustomerAddressById(int addressId);
 
 
-    List<CustomerAddress> findAll();
+    List<Address> findAll();
 
 
-    void save(CustomerAddress customerAddress);
+    void save(Address address);
 
 
     void deleteCustomerAddressById(int addressId);

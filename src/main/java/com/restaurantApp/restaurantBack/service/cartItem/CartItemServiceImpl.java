@@ -4,15 +4,16 @@ import com.restaurantApp.restaurantBack.dao.CartDAO;
 import com.restaurantApp.restaurantBack.dao.CartItemDAO;
 import com.restaurantApp.restaurantBack.dao.CustomerDAO.CustomerDAO;
 import com.restaurantApp.restaurantBack.dao.MenuItemDAO;
-import com.restaurantApp.restaurantBack.dto.CartItemDTO;
+import com.restaurantApp.restaurantBack.dto.CartItemDTOS.RequestCartItemDTO;
+import com.restaurantApp.restaurantBack.dto.CartItemDTOS.ResponseCartItemDTO;
+import com.restaurantApp.restaurantBack.dto.CartItemDTOS.UpdateCartItemDTO;
 import com.restaurantApp.restaurantBack.entity.Cart;
 import com.restaurantApp.restaurantBack.entity.CartItem;
 import com.restaurantApp.restaurantBack.entity.Customer;
 import com.restaurantApp.restaurantBack.entity.MenuItem;
-import com.restaurantApp.restaurantBack.exception.CartItemNotFoundException;
-import com.restaurantApp.restaurantBack.exception.CustomerNotFoundException;
-import com.restaurantApp.restaurantBack.exception.EmptyCardException;
-import com.restaurantApp.restaurantBack.exception.ItemNotFoundException;
+import com.restaurantApp.restaurantBack.exception.*;
+import org.apache.coyote.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class CartItemServiceImpl implements CartItemService{
 
     private CustomerDAO customerDAO;
 
+    @Autowired
     public CartItemServiceImpl(CartItemDAO cartItemDAO,CartDAO cartDAO,
                                MenuItemDAO menuItemDAO,CustomerDAO customerDAO){
         this.cartItemDAO = cartItemDAO;
@@ -42,64 +44,47 @@ public class CartItemServiceImpl implements CartItemService{
 
 
     @Override
-    public CartItemDTO addCartItem(CartItemDTO cartItemDTO,int customerId) {
-
-        MenuItem menuItem = this.menuItemDAO.findById(cartItemDTO.getMenuItemId()).orElseThrow(
-                ()-> new ItemNotFoundException("Menu Item with id = "+cartItemDTO.getMenuItemId()+" is not found.")
+    public ResponseCartItemDTO addCartItem(RequestCartItemDTO requestCartItemDTO,String userName) {
+        Customer customer = this.customerDAO.findCustomerByUserName(userName).orElseThrow(
+                ()->new CustomerNotFoundException("No Customer linked to user with username = "+userName)
         );
-
-        Customer customer = this.customerDAO.findById(customerId).orElseThrow(
-                ()-> new CustomerNotFoundException("Customer with id = "+customerId+" is not found.")
-        );
-
-        Cart cart = this.cartDAO.findByCustomerId(customerId).orElseGet(
-                ()-> createNewCartForCustomer(customer)
+        Cart cart = this.cartDAO.findByCustomerId(customer.getId()).orElseThrow(
+                ()->new CartNotFoundException("Customer with id "+customer.getId()+" doesn't have Cart.")
         );
 
 
-        CartItem cartItem = new CartItem();
 
-        cartItem.setMenuItem(menuItem);
-        cartItem.setQuantity(cartItemDTO.getQuantity());
-        double totalPrice = Double.parseDouble(menuItem.getPrice())*cartItemDTO.getQuantity();
-        cartItem.setTotalPrice(totalPrice);
+        CartItem cartItem = toCartItemEntity(requestCartItemDTO);
+
         cart.addCartItem(cartItem);
-
-        cartItem.setCustomization(cartItemDTO.getCustomization());
         CartItem savedCartItem = this.cartItemDAO.save(cartItem);
-        return convertEntityToDTO(savedCartItem);
+
+        return toCartItemDTO(savedCartItem);
+
     }
 
     @Override
-    public CartItemDTO findById(int cartItemId) {
-        CartItem cartItem = this.cartItemDAO.findById(cartItemId).get();
-        return convertEntityToDTO(cartItem);
+    public ResponseCartItemDTO findById(int cartItemId) {
+        CartItem cartItem= this.cartItemDAO.findById(cartItemId).orElseThrow(
+                ()->new CartItemNotFoundException("Item cart wit id = "+cartItemId+" is not found.")
+        );
+        return toCartItemDTO(cartItem);
     }
 
     @Override
-    public List<CartItemDTO> findAllCartItemsByCustomerId(int customerId) {
+    public ResponseCartItemDTO updateCartItem(UpdateCartItemDTO updateCartItemDTO, int cartItemId) {
 
-        Cart cart = this.cartDAO.findByCustomerId(customerId).orElseThrow(
-                ()-> new CustomerNotFoundException("Cart not found for Customer with ID "+customerId)
+        CartItem cartItem = this.cartItemDAO.findById(cartItemId).orElseThrow(
+                ()-> new CartItemNotFoundException("Cart Item with id = "+cartItemId+" is not found.")
         );
 
-        List<CartItem> cartItems = cart.getCartItemList();
-        if(cartItems.isEmpty()){
-            throw new EmptyCardException("Card is Empty.");
-        }
-        List<CartItemDTO> cartItemDTOS = new ArrayList<>();
-        for(CartItem m : cartItems){
-            cartItemDTOS.add(convertEntityToDTO(m));
-        }
-        return cartItemDTOS;
-    }
+        cartItem.setCustomization(updateCartItemDTO.getCustomization());
+        cartItem.setQuantity(updateCartItemDTO.getQuantity());
+        cartItem.setTotalPrice(Double.parseDouble(cartItem.getMenuItem().getPrice())*updateCartItemDTO.getQuantity());
 
-    @Override
-    public CartItemDTO updateCartItem(CartItemDTO cartItemDTO, int customerId) {
+        CartItem updatedCartItem = this.cartItemDAO.save(cartItem);
 
-
-        CartItem cartItem = convertDTOToEntity(cartItemDTO,customerId);
-        return convertEntityToDTO(cartItemDAO.save(cartItem));
+        return toCartItemDTO(updatedCartItem);
 
     }
 
@@ -111,37 +96,6 @@ public class CartItemServiceImpl implements CartItemService{
         this.cartItemDAO.delete(cartItem);
     }
 
-    CartItemDTO convertEntityToDTO(CartItem cartItem){
-        CartItemDTO cartItemDTO = new CartItemDTO();
-        cartItemDTO.setMenuItemId(cartItem.getMenuItem().getId());
-        cartItemDTO.setMenuItemName(cartItem.getMenuItem().getName());
-        cartItemDTO.setQuantity(cartItem.getQuantity());
-        cartItemDTO.setCustomization(cartItem.getCustomization());
-        cartItemDTO.setCartItemId(cartItem.getId());
-        return cartItemDTO;
-    }
-
-    CartItem convertDTOToEntity(CartItemDTO cartItemDTO,int customerId){
-
-        CartItem cartItem = this.cartItemDAO.findById(cartItemDTO.getCartItemId()).orElseThrow(
-                ()-> new CartItemNotFoundException("Cart Item with ID = "+cartItemDTO.getCartItemId()+" is not found")
-        );
-        cartItem.setId(cartItemDTO.getCartItemId());
-        MenuItem menuItem = this.menuItemDAO.findById(cartItemDTO.getMenuItemId()).orElseThrow(
-                ()-> new ItemNotFoundException("Menu Item with id = "+cartItemDTO.getMenuItemId()+" is not found.")
-        );
-        Cart cart = this.cartDAO.findByCustomerId(customerId).get();
-
-        cartItem.setMenuItem(menuItem);
-        cartItem.setCart(cart);
-
-        cartItem.setQuantity(cartItemDTO.getQuantity());
-        double totalPrice = Double.parseDouble(menuItem.getPrice()) * cartItemDTO.getQuantity();
-        cartItem.setTotalPrice(totalPrice);
-        cartItem.setCustomization(cartItemDTO.getCustomization());
-        return cartItem;
-    }
-
     private Cart createNewCartForCustomer(Customer customer){
 
         Cart cart = new Cart();
@@ -150,5 +104,38 @@ public class CartItemServiceImpl implements CartItemService{
         cart.setActive(true);
         cart.setTotalAmount(0.0);
         return cartDAO.save(cart);
+    }
+
+    public ResponseCartItemDTO toCartItemDTO(CartItem cartItem){
+        ResponseCartItemDTO responseCartItemDTO = new ResponseCartItemDTO();
+
+       responseCartItemDTO.setCartItemId(cartItem.getId());
+       responseCartItemDTO.setMenuItemName(cartItem.getMenuItem().getName());
+       responseCartItemDTO.setCartId(cartItem.getCart().getId());
+       responseCartItemDTO.setQuantity(cartItem.getQuantity());
+       responseCartItemDTO.setTotalPrice(cartItem.getTotalPrice());
+       responseCartItemDTO.setCustomization(cartItem.getCustomization());
+
+        return responseCartItemDTO;
+    }
+
+    private CartItem toCartItemEntity(RequestCartItemDTO requestCartItemDTO) {
+        CartItem cartItem = new CartItem();
+
+        MenuItem menuItem = this.menuItemDAO.findById(requestCartItemDTO.getMenuItemId()).orElseThrow(
+                () -> new MenuItemNotFoundException("MenuItem with id = " + requestCartItemDTO.getMenuItemId() + " is not found.")
+        );
+
+        cartItem.setMenuItem(menuItem);
+
+        cartItem.setQuantity(requestCartItemDTO.getQuantity());
+
+
+        double totalPrice = requestCartItemDTO.getQuantity()*Double.parseDouble(menuItem.getPrice());
+        cartItem.setTotalPrice(totalPrice);
+
+        cartItem.setCustomization(requestCartItemDTO.getCustomization());
+
+        return cartItem;
     }
 }

@@ -3,6 +3,7 @@ package com.restaurantApp.restaurantBack.entity;
 import com.restaurantApp.restaurantBack.Validation.ValidReservationDate;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,6 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @ValidReservationDate
 public class Reservation {
 
@@ -35,7 +35,7 @@ public class Reservation {
 
 
     @Column(name = "reservation_date_begin")
-    @FutureOrPresent(message = "reservation date must can't be in the past")
+    @FutureOrPresent(message = "reservation date  can't be in the past")
     private LocalDateTime reservationDateTimeBegin;
 
     @Column(name = "reservation_date_end")
@@ -47,6 +47,10 @@ public class Reservation {
 
     @Column(name = "special_Instructors")
     private String specialInstructions;
+
+    @Column(name = "status")
+    @Pattern(regexp = "ACTIVE|CANCELED|active|canceled",message = "status must be either ACTIVE or CANCELED.")
+    private String status;
 
 
 
