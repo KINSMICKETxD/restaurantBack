@@ -19,5 +19,8 @@ public interface CustomerDAO extends JpaRepository<Customer,Integer> {
     @Query("select c.id from Customer c where c.user.userName = :userName")
     Optional<Integer> findCustomerIdByUserName(@Param("userName")String userName);
 
+    @Query("select c.id from Customer c where c.user.id = :userId")
+    Optional<Integer> findCustomerIdByUserId(@Param("userId")int userId);
+
 
 }

@@ -139,7 +139,8 @@ public class ReservationServiceImpl implements ReservationService{
 
 
     @Override
-    public ReservationDTO createNewReservation(ReservationDTO reservationDTO, int customerId) {
+    public ReservationDTO createNewReservation(ReservationDTO reservationDTO, int userId) {
+        Integer customerId = this.customerDAO.findCustomerIdByUserId(userId).orElseThrow();
         int customerActiveReservationsCount = this.reservationDAO.getAllActiveReservationsForCustomer(customerId,LocalDateTime.now()).get();
         if(customerActiveReservationsCount > 2){
             throw new MaxActiveReservationException("You  reach the Limit of Active Reservations");
