@@ -1,8 +1,10 @@
 package com.restaurantApp.restaurantBack.jwt;
 
 
+import com.restaurantApp.restaurantBack.dao.CustomerDAO.CustomerDAO;
 import com.restaurantApp.restaurantBack.dao.RoleDAO;
 import com.restaurantApp.restaurantBack.dao.UserDAO;
+import com.restaurantApp.restaurantBack.entity.Customer;
 import com.restaurantApp.restaurantBack.entity.Role;
 import com.restaurantApp.restaurantBack.entity.User;
 import lombok.AllArgsConstructor;
@@ -22,6 +24,8 @@ public class AuthenticationService {
 
     private final UserDAO userDAO;
 
+    private final CustomerDAO customerDAO;
+
     private final RoleDAO roleDAO;
 
     private final PasswordEncoder passwordEncoder;
@@ -39,8 +43,10 @@ public class AuthenticationService {
         Set<Role> roles = new HashSet<>();
         roles.add(roleDAO.findByAuthority("ROLE_USER").get());
         user.setAuthorities(roles);
-        User savedUser = this.userDAO.save(user);
 
+        User savedUser = this.userDAO.save(user);
+        Customer customer = Customer.builder().user(savedUser).build();
+        this.customerDAO.save(customer);
         return savedUser;
     }
 
