@@ -147,4 +147,11 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException exception){
+        errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403),exception.getMessage());
+        errorDetail.setProperty("description","UserName cannot be found.");
+        return new ResponseEntity<>(errorDetail.getDetail(),HttpStatus.BAD_REQUEST);
+    }
+
 }
