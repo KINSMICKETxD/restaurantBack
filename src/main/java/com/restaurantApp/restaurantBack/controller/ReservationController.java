@@ -1,5 +1,6 @@
 package com.restaurantApp.restaurantBack.controller;
 
+import com.restaurantApp.restaurantBack.dto.CreateReservationDTO;
 import com.restaurantApp.restaurantBack.dto.ReservationDTO;
 import com.restaurantApp.restaurantBack.dto.ReservationDurationDTO;
 import com.restaurantApp.restaurantBack.entity.Customer;
@@ -36,13 +37,13 @@ public class ReservationController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ReservationDTO> createReservation(@Valid @RequestBody ReservationDTO reservationDTO){
+    public ResponseEntity<ReservationDTO> createReservation(@Valid @RequestBody CreateReservationDTO createReservationDTO){
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         User currentUser = (User) authentication.getPrincipal();
 
-        ReservationDTO createdReservation = this.reservationService.createNewReservation(reservationDTO,currentUser.getId());
+        ReservationDTO createdReservation = this.reservationService.createNewReservation(createReservationDTO,currentUser.getId());
 
         return ResponseEntity.ok(createdReservation);
     }

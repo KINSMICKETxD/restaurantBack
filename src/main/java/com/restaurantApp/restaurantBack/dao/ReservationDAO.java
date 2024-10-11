@@ -1,6 +1,7 @@
 package com.restaurantApp.restaurantBack.dao;
 
 import com.restaurantApp.restaurantBack.entity.Reservation;
+import com.restaurantApp.restaurantBack.entity.RestaurantTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,8 +37,5 @@ public interface ReservationDAO extends JpaRepository<Reservation,Integer> {
             "r.reservationDateTimeBegin >= :dateTimeNow")
     public Optional<Integer> getAllActiveReservationsForCustomer(@Param("customerId")int customerId,
                                                                    @Param("dateTimeNow")LocalDateTime dateTime);
-
-
-
 
 }

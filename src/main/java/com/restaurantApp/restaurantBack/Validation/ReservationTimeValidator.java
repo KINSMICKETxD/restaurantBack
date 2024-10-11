@@ -1,6 +1,7 @@
 package com.restaurantApp.restaurantBack.Validation;
 
 import com.restaurantApp.restaurantBack.dao.RestaurantTableDAO;
+import com.restaurantApp.restaurantBack.dto.CreateReservationDTO;
 import com.restaurantApp.restaurantBack.entity.Reservation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -9,17 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class ReservationTimeValidator implements ConstraintValidator<ValidReservationDate, Reservation> {
+public class ReservationTimeValidator implements ConstraintValidator<ValidReservationDate, CreateReservationDTO> {
 
     private static final Duration MIN_ADVANCE_DURATION = Duration.ofHours(2);
     private static final Duration MAX_ADVANCE_DURATION = Duration.ofDays(30);
 
 
     @Override
-    public boolean isValid(Reservation reservation, ConstraintValidatorContext context) {
+    public boolean isValid(CreateReservationDTO reservation, ConstraintValidatorContext context) {
 
-        LocalDateTime reservationDateBegin = reservation.getReservationDateTimeBegin();
-        LocalDateTime reservationDateEnd = reservation.getReservationDateTimeEnd();
+        LocalDateTime reservationDateBegin = reservation.getReservationDateBegin();
+        LocalDateTime reservationDateEnd = reservation.getReservationDateEnd();
 
 
 
@@ -56,15 +57,9 @@ public class ReservationTimeValidator implements ConstraintValidator<ValidReserv
 
             return false;
         }
-        if(reservation.getGuestNumber() > reservation.getTable().getSeatingCapacity()){
-            context.buildConstraintViolationWithTemplate("Number of Guests exceed The Table Capacity ("+reservation.getTable().getSeatingCapacity()+")")
-                    .addPropertyNode("numberOfGuests")
-                    .addConstraintViolation();
-
-            return false;
-        }
-
         return true;
 
     }
+
+
 }

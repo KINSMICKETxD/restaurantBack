@@ -17,10 +17,12 @@ public interface RestaurantTableDAO extends JpaRepository<RestaurantTable,Intege
 
     Optional<List<RestaurantTable>> findAllByOrderByTableNumberAsc();
 
+    Optional<RestaurantTable> findByTableNumber(int tableNumber);
+
     @Query("from RestaurantTable t where t.seatingCapacity >= :numberOfGuests " +
             "and t.id NOT IN (select r.table.id from Reservation r where " +
-            "r.reservationDateTimeBegin < :endDateTime " +
-            "and r.reservationDateTimeEnd > :beginDateTime)")
+            "r.reservationDateTimeBegin <= :endDateTime " +
+            "and r.reservationDateTimeEnd >= :beginDateTime)")
     Optional<List<RestaurantTable>> findTableForCustomer(@Param("numberOfGuests")int numberOfGuests,
                                                          @Param("endDateTime")LocalDateTime endDateTime,
                                                          @Param("beginDateTime")LocalDateTime beginDateTime);

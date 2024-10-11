@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import javax.swing.text.html.Option;
+import java.util.List;
 import java.util.Optional;
 
 @DataJpaTest
@@ -134,6 +135,24 @@ public class UserDAOTest {
         //Assert
         Assertions.assertThat(deletedUser).isNotPresent();
 
+    }
+
+    @Test
+    public void testGetAllUsers(){
+
+        //Arrange
+        User user1 = User.builder().userName("user1").firstName("firstNameUser1")
+                .lastName("lastNameUser2").email("emailUser2").password("passwordUser1")
+                .isActive(true).build();
+        this.userDAO.save(user);
+        this.userDAO.save(user1);
+
+        //Act
+        List<User> users = this.userDAO.findAll();
+
+        //Assert
+        Assertions.assertThat(users).isNotNull();
+        Assertions.assertThat(users.size()).isEqualTo(2);
     }
 
 }

@@ -1,8 +1,10 @@
 package com.restaurantApp.restaurantBack.service.reservation;
 
+import com.restaurantApp.restaurantBack.dto.CreateReservationDTO;
 import com.restaurantApp.restaurantBack.dto.ReservationDTO;
 import com.restaurantApp.restaurantBack.dto.ReservationDurationDTO;
 import com.restaurantApp.restaurantBack.entity.Reservation;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -20,7 +22,7 @@ public interface ReservationService {
 
     List<ReservationDurationDTO> getAllReservationByTableId(int tableId);
 
-    ReservationDTO createNewReservation(ReservationDTO reservationDTO,int customerId);
+    ReservationDTO createNewReservation(CreateReservationDTO createReservationDTO, int customerId);
 
     ReservationDTO cancelReservation(int reservationId);
 
