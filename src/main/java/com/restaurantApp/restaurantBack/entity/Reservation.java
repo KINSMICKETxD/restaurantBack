@@ -3,6 +3,7 @@ package com.restaurantApp.restaurantBack.entity;
 import com.restaurantApp.restaurantBack.Validation.ValidReservationDate;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
@@ -10,7 +11,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reservation")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -40,6 +42,7 @@ public class Reservation {
     private LocalDateTime reservationDateTimeEnd;
 
     @Column(name = "guests_number")
+    @Min(value = 1,message = "guest Number must be greater than 0")
     private int guestNumber;
 
     @Column(name = "special_Instructors")
@@ -48,12 +51,6 @@ public class Reservation {
     @Column(name = "status")
     @Pattern(regexp = "ACTIVE|CANCELED|active|canceled",message = "status must be either ACTIVE or CANCELED.")
     private String status;
-
-
-
-
-
-
 
 
 }

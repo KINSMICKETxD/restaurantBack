@@ -1,13 +1,11 @@
 package com.restaurantApp.restaurantBack.dao;
 
 import com.restaurantApp.restaurantBack.entity.Reservation;
-import com.restaurantApp.restaurantBack.entity.RestaurantTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +15,8 @@ import java.util.Optional;
 public interface ReservationDAO extends JpaRepository<Reservation,Integer> {
 
 
-    Optional<List<Reservation>> findByCustomerId(int customerId);
+    @Query("from Reservation r where r.customer.id = :customerId")
+    Optional<List<Reservation>> findByCustomerId(@Param("customerId") int customerId);
 
     Optional<Reservation> findByIdAndCustomerId(int reservationId,int customerId);
 
@@ -30,7 +29,7 @@ public interface ReservationDAO extends JpaRepository<Reservation,Integer> {
 
     @Query("from Reservation r where " +
             "r.table.id = :tableId and r.reservationDateTimeBegin > now() ")
-    public List<Reservation>  getAllReservationsForATable(@Param("tableId")int tableId);
+    public Optional<List<Reservation>> getAllActiveReservationsForATable(@Param("tableId")int tableId);
 
 
     @Query("select count(r.id) from Reservation r where r.customer.id = :customerId and " +

@@ -128,7 +128,7 @@ public class ReservationServiceImpl implements ReservationService{
     @Override
     public List<ReservationDurationDTO> getAllReservationByTableId(int tableId) {
 
-        List<Reservation> reservations = this.reservationDAO.getAllReservationsForATable(tableId);
+        List<Reservation> reservations = this.reservationDAO.getAllActiveReservationsForATable(tableId).get();
 
         List<ReservationDurationDTO> reservationDurationDTOS = new ArrayList<>();
         for(Reservation r : reservations){
